@@ -1,0 +1,5 @@
+# wrap pack
+*.plb
+*.~*
+oracle/install/*.sql
+oracle/install/*.zip

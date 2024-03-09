@@ -1,0 +1,167 @@
+<script biruni>
+page.ctrl(function(model, scope, fi, t, param) {
+  var d = model || {}, q = {};
+
+  q.t_high_weight_deficit = t('high weight deficit')();
+  q.t_weight_deficit = t('weight deficit')();
+  q.t_ideal_weight = t('ideal weight')();
+  q.t_excess_weight = t('excess weight')();
+  q.t_first_obesity_level = t('first obesity level')();
+  q.t_second_obesity_level = t('second obesity level')();
+  q.t_third_obesity_level = t('third obesity level')();
+
+  q.color;
+
+  function requiredAnthropometrics() {
+    return d.height || d.weight;
+  }
+
+  function bodyMassIndex() {
+    var index = (d.weight * 10000) / (d.height * d.height);
+
+    if (index < 16) {
+      q.color = 'primary';
+      return q.t_high_weight_deficit
+    }
+    else if (index >= 16 && index < 18.5) {
+      q.color = 'primary';
+      return q.t_weight_deficit;
+    }
+    else if (index >= 18.5 && index <= 25) {
+      q.color = 'success';
+      return q.t_ideal_weight;
+    }
+    else if (index > 25 && index <= 30) {
+      q.color = 'warning';
+      return q.t_excess_weight;
+    }
+    else if (index > 30 && index <= 35) {
+      q.color = 'danger';
+      return q.t_first_obesity_level;
+    }
+    else if (index > 35 && index <= 40) {
+      q.color = 'danger';
+      return q.t_second_obesity_level;
+    }
+    else if (index > 40) {
+      q.color = 'danger';
+      return q.t_third_obesity_level;
+    }
+    else {
+      q.color = '';
+      return null;
+    }
+  }
+
+  function changePhone() {
+    // if (d.phone == null) d.phone = '+998 ';
+    // else if (d.phone.length == 7) d.phone += ' ';
+    // else if (d.phone.length == 11) d.phone += ' ';
+    // else if (d.phone.length == 14) d.phone += ' ';
+  }
+
+  function save() {
+    if (!page.valid(scope.form)) return;
+
+    var data = _.pick(d, 'last_name', 'first_name', 'last_name', 'patronymic', 'passport_number', 'birth_date', 'gender', 'phone', 'height', 'weight', 'address', 'job');
+    fi.save(data).then(page.close, page.alert);
+  }
+
+  scope.d = d;
+  scope.q = q;
+});
+</script>
+<div class="b-toolbar row">
+  <div class="col-sm-24">
+    <button type="button" class="btn btn-success" ng-click="save()" ng-if="fi.save" b-hotkey="save">{{ fi.save.title }}</button>
+    <button type="button" class="btn btn-default" ng-click="page.close()">{{ page.close.title }}</button>
+  </div>
+</div>
+<div class="b-content"><form name="form">
+  <div class="card card-custom">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="form-group row">
+            <div class="col-sm-12">
+              <label><t>patient medical history number</t></label>
+              <span class="form-view">{{ d.patient_medical_history_number }}</span>
+            </div>
+            <div class="col-sm-12">
+              <label><t>birth date</t><r /></label>
+              <input type="text" class="form-control" b-date-picker ng-model="d.birth_date" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label><t>last name</t><r /></label>
+            <input type="text" class="form-control" ng-model="d.last_name" b-maxlength="50" required />
+          </div>
+          <div class="form-group">
+            <label><t>first name</t><r /></label>
+            <input type="text" class="form-control" ng-model="d.first_name" b-maxlength="50" required />
+          </div>
+          <div class="form-group">
+            <label><t>patronymic</t><r /></label>
+            <input type="text" class="form-control" ng-model="d.patronymic" b-maxlength="50" required />
+          </div>
+          <div class="form-group row">
+            <div class="col-sm-12">
+              <div class="form-group">
+                <label><t>passport number</t><r /></label>
+                <input type="text" placeholder="AA1234567" class="form-control" ng-model="d.passport_number" ng-pattern="/^[A-Z]{2}\d{7}$/" required />
+              </div>
+            </div>
+            <div class="col-sm-12">
+              <div class="form-group">
+                <label><t>gender</t><r /></label><br />
+                <label class="radio">
+                  <input type="radio" value="M" ng-model="d.gender" /><span><t>male</t></span>
+                </label>
+                <label class="radio">
+                  <input type="radio" value="F" ng-model="d.gender" /><span><t>female</t></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-12">
+          <div class="form-row">
+            <div class="col-sm-8">
+              <div class="form-group">
+                <label><t>height (cm)</t><r ng-if="requiredAnthropometrics()" /></label>
+                <input type="text" b-number  placeholder="123" class="form-control" ng-model="d.height" b-maxlength="3" ng-required="requiredAnthropometrics()"/>
+              </div>
+            </div>
+            <div class="col-sm-8">
+              <div class="form-group">
+                <label><t>weight (kg)</t><r ng-if="requiredAnthropometrics()" /></label>
+                <input type="text" b-number precision="3" scale="1" placeholder="123.4" class="form-control" ng-model="d.weight" ng-required="requiredAnthropometrics()"/>
+              </div>
+            </div>
+            <div class="col-sm-8">
+              <div class="form-group">
+                <label><t>body mass index</t></label>
+                <label><t>status remain days</t></label><br>
+                <div class="form-view b-offcanvas-hide alert alert-custom text-left py-1 px-5 mb-0 d-inline-flex" ng-class="'alert-light-' + q.color">
+                  <div class="alert-text" style="color: black;">{{ bodyMassIndex() }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label><t>phone</t><r /></label>
+            <input type="text" class="form-control" ng-model="d.phone" ng-change="changePhone()" b-maxlength="17" ng-pattern="^\+\d{3} \d{2} \d{3} \d{2} \d{2}$" required />
+          </div>
+          <div class="form-group">
+            <label><t>address</t></label>
+            <input type="text" class="form-control" ng-model="d.address" b-maxlength="200" />
+          </div>
+          <div class="form-group">
+            <label><t>job</t></label>
+            <input type="text" class="form-control" ng-model="d.job" b-maxlength="100" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</form></div>

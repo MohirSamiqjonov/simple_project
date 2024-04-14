@@ -1,0 +1,82 @@
+<script biruni>
+page.ctrl(function(scope, fi, model) {
+  var d = model || {}, q = {};
+  
+  function loadDrugs() {
+    if (!page.valid(scope.form)) return;
+    page.post(':get_drugs', {
+      passport_number: d.passport_number
+    }).then(function(result) {
+      d.drugs = _.mapRows(result, ['drug_id', 'drug_name', 'dosage_form_name', 'visit_id', 'required_count_medicine', 'sold_count_medicine', 'note']);
+    }, page.alert);
+  }
+
+  function checkCount(drug) {
+    if (drug.sold_count_medicine) drug.sold_count_medicine = Math.min(drug.sold_count_medicine, drug.required_count_medicine);
+  }
+
+  function save() {
+    if (page.valid(scope.form)) {
+      var data = {};
+      data.drugs = _.chain(d.drugs)
+                    .map(x => _.pick(x, 'drug_id', 'visit_id', 'sold_count_medicine'))
+                    .value();
+
+      fi.save(data).then(page.close, page.alert);
+    }
+  }
+
+  scope.d = d;
+  scope.q = q;
+});
+</script>
+<div class="b-toolbar">
+  <button type="button" class="btn btn-success" ng-click="save()" ng-if="fi.save" ng-disabled="!d.drugs.length" b-hotkey="save">{{ fi.save.title }}</button>
+  <button type="button" class="btn btn-default" ng-click="page.close()">{{ page.close.title }}</button>
+</div>
+<div class="b-content"><form name="form">
+    <div class="card card-custom">
+      <div class="card-body">
+        <div class="form-group row">
+          <div class="col-sm-4">
+            <label><t>passport number</t><r /></label>
+            <input type="text" class="form-control" ng-model="d.passport_number" placeholder="AB1234567" ng-pattern="/^[A-Z]{2}\d{7}$/" required />
+          </div>
+        </div>
+        <div class="form-group row">
+          <div class="col-sm-4">
+            <button type="button" class="btn btn-primary" ng-click="loadDrugs()" ng-if="fi.get_drugs">{{ fi.get_drugs.title }}</button>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-24">
+            <div class="form-group">
+              <div class="offset-sm-12 col-sm-12">
+                <b-pg-controller name="drugs"/>
+              </div>
+            </div>
+            <div>
+              <b-pg-grid name="drugs" local-data="d.drugs" iterator="drug" search="drug_name">
+                <b-pg-row>
+                  <b-pg-col name="rownum" size="1">
+                    <div class="text-center">{{ drug.rownum }}</div>
+                  </b-pg-col>
+                  <b-pg-col name="drug_name" size="10"/>
+                  <b-pg-col name="dosage_form_name" size="3"/>
+                  <b-pg-col name="required_count_medicine" size="2"/>
+                  <b-pg-col name="sold_count_medicine" size="2"> 
+                    <input type="text"
+                          ng-model="drug.sold_count_medicine"
+                          class="form-control"
+                          ng-blur="checkCount(drug)"
+                          b-number="positive"/>
+                  </b-pg-col>
+                  <b-pg-col name="note" size="6"/>
+                </b-pg-row>
+              </b-pg-grid>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</form></div>

@@ -1,0 +1,290 @@
+<script biruni>
+page.ctrl(function(scope, fi, model, t) {
+  var d = model || {}, q = {};
+  console.log(d);
+  q.tClearDiseaseList = t('clear all diseases ?')();
+  q.tClearDrugList = t('clear all drugs ?')();
+
+  d.diseases = _.mapRows(model.diseases, ['disease_id','disease_name','note']);
+  d.drugs = _.mapRows(model.drugs, ['drug_id', 'drug_name', 'dosage_form_name', 'required_count_medicine', 'note']);
+
+  tryAddEmptyRowToDisease();
+  tryAddEmptyRowToDrug();
+
+  function setPatientHistory(row) {
+    d.patient_medical_history_number = row.patient_medical_history_number;
+    d.patient_medical_history_id = row.patient_medical_history_id;
+    d.last_name = row.last_name;
+    d.first_name = row.first_name;
+    d.patronymic = row.patronymic;
+    d.birth_date = row.birth_date
+  }
+
+  function tryAddEmptyRowToDisease() {
+    if (d.diseases.length == 0) d.diseases.push({});
+    else {
+      var last = _.last(d.diseases);
+      if (last.disease_id) d.diseases.push({});
+    }
+  }
+
+  function tryAddEmptyRowToDrug() {
+    if (d.drugs.length == 0) d.drugs.push({});
+    else {
+      var last = _.last(d.drugs);
+      if (last.drug_id) d.drugs.push({});
+    }
+  }
+
+  function setDisease(disease, row) {
+    if (!row) return;
+
+    disease.disease_name = row.name;
+    disease.disease_id = row.disease_id;
+
+    tryAddEmptyRowToDisease();
+  }
+
+  function setDrug(drug, row) {
+    if (!row) return;
+
+    drug.drug_name = row.name;
+    drug.drug_id = row.drug_id;
+    drug.dosage_form_name = row.dosage_form_name;
+
+    tryAddEmptyRowToDrug();
+  }
+
+  function withoutDisease(disease) {
+    d.diseases = _.without(d.diseases, disease);
+  }
+
+  function withoutDrug(drug) {
+    d.drugs = _.without(d.drugs, drug);
+  }
+
+  function diseaseWhere() {
+    let disease_ids = _.chain(d.diseases).filter(x => x.disease_id).pluck('disease_id').value();
+    return disease_ids.length > 0 ? ['disease_id', '<>', disease_ids] : null;
+  }
+
+  function changeDiseaseQuery(query, value) {
+    query.where(diseaseWhere());
+    query.searchValue(value);
+  }
+
+  function drugWhere() {
+    let drug_ids = _.chain(d.drugs).filter(x => x.drug_id).pluck('drug_id').value();
+    return drug_ids.length > 0 ? ['drug_id', '<>', drug_ids] : null;
+  }
+
+  function changeDrugQuery(query, value) {
+    query.where(drugWhere());
+    query.searchValue(value);
+  }
+
+  function clearDiseaseList() {
+    d.diseases = [];
+    tryAddEmptyRowToDisease();
+  }
+
+  function clearDrugList() {
+    d.drugs = [];
+    tryAddEmptyRowToDrug();
+  }
+
+  function save() {
+    if (page.valid(scope.form)) {
+      var data = _.pick(d, 'visit_id', 'patient_medical_history_id', 'visit_date', 'note');
+      data.diseases = _.chain(d.diseases)
+                       .filter('disease_id')
+                       .map(x => _.pick(x, 'disease_id', 'note'))
+                       .value();
+      data.drugs = _.chain(d.drugs)
+                    .filter('drug_id')
+                    .map(x => _.pick(x, 'drug_id', 'required_count_medicine', 'note'))
+                    .value();
+      fi.save(data).then(page.close, page.alert);
+    }
+  }
+
+  scope.q = q;
+  scope.d = d;
+});
+</script>
+<div class="b-toolbar">
+  <button type="button" class="btn btn-success" ng-click="save()" ng-if="fi.save" b-hotkey="save">{{ fi.save.title }}</button>
+  <button type="button" class="btn btn-default" ng-click="page.close()">{{ page.close.title }}</button>
+</div>
+<div class="b-content"><form name="form">
+    <div class="card card-custom">
+      <div class="card-body">
+        <div class="form-group row">
+          <div class="col-sm-12">
+            <div class="form-group row">
+              <div class="col-sm-12">
+                <label><t>patient medical history number</t><r /></label>
+                <b-input name="patient_medical_histories"
+                        model="d.patient_medical_history_number"
+                        model-key="d.patient_medical_history_id"
+                        column="patient_medical_history_id, patient_medical_history_number, last_name, first_name, patronymic, birth_date"
+                        on-select="setPatientHistory(row)"
+                        on-delete="setPatientHistory({})"
+                        readonly="d.is_edit == 'Y'"
+                        required-key>
+                  <header>
+                    <div class="col-sm-12"><t>patient medical history number</t></div>
+                    <div class="col-sm-12"><t>full name</t></div>
+                  </header>
+                  <content>
+                    <div class="col-sm-12">{{ row.patient_medical_history_number }}</div>
+                    <div class="col-sm-12">{{ row.last_name + ' ' + row.first_name }}</div>
+                  </content>
+                </b-input>
+              </div>
+              <div class="col-sm-12">
+                <label><t>birth date</t></label>
+                <div class="form-view">{{ d.birth_date }}</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label><t>full name</t></label>
+              <div class="form-view">{{ d.last_name + ' ' + d.first_name + ' ' + d.patronymic }}</div>
+            </div>
+          </div>
+          <div class="col-sm-12">
+            <div class="form-group row">
+              <div class="col-sm-12">
+                <label><t>visit date</t><r /></label>
+                <input type="text" class="form-control" b-date-picker ng-model="d.visit_date" ng-readonly="d.is_edit == 'Y'" required />
+              </div>
+            </div>
+            <label><t>note</t></label>
+            <textarea class="form-control" rows="2" ng-model="d.note" />
+          </div>
+        </div>
+        <div class="separator separator-solid my-6"></div>
+        <div class="row">
+          <div class="col-sm-24">
+            <div class="form-group">
+              <div class="offset-sm-12 col-sm-12">
+                <b-pg-controller name="diseases"/>
+              </div>  
+            </div>
+            <b-pg-grid name="diseases" local-data="d.diseases" iterator="disease" search="disease_name">
+              <b-pg-header name="actions">
+                <div class="text-center">
+                  <button type="button"
+                          class="btn btn-outline-danger btn-icon"
+                          ng-if="d.diseases.length > 1"
+                          b-toggle
+                          data-title="{{ q.tClearDiseaseList }}"
+                          on-click-yes="clearDiseaseList()">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </div>
+              </b-pg-header>
+              <b-pg-row>
+                <b-pg-col name="rownum" size="1">
+                  <div class="text-center">{{ disease.rownum }}</div>
+                </b-pg-col>
+                <b-pg-col name="disease_name" size="10">
+                  <b-input name="diseases"
+                          model="disease.disease_name"
+                          model-key="disease.disease_id"
+                          column="disease_id, name"
+                          search="name"
+                          on-select="setDisease(disease, row)"
+                          on-delete="setDisease(disease, {})"
+                          on-change="changeDiseaseQuery(query, value)">
+                        {{ row.name }}
+                  </b-input>
+                </b-pg-col>
+                <b-pg-col name="note" size="12">
+                  <input type="text"
+                        b-maxlength="500"
+                        class="form-control"
+                        ng-model="disease.note"
+                        ng-required="disease.disease_id"/>
+                </b-pg-col>
+                <b-pg-col name="actions" size="1">
+                  <div class="text-center" ng-if="disease.rownum < d.diseases.length">
+                    <button type="button" class="btn btn-default btn-icon btn-hover-text-danger" ng-click="without(d.diseases, disease)"><i class="fa fa-trash"></i></button>
+                  </div>
+                </b-pg-col>
+              </b-pg-row>
+            </b-pg-grid>
+          </div>
+        </div>
+        <div class="separator separator-solid my-6"></div>
+        <div class="row">
+          <div class="col-sm-24">
+            <div class="form-group">
+              <div class="offset-sm-12 col-sm-12">
+                <b-pg-controller name="drugs"/>
+              </div>
+            </div>
+            <div>
+              <b-pg-grid name="drugs" local-data="d.drugs" iterator="drug" search="drug_name">
+                <b-pg-header name="actions">
+                  <div class="text-center">
+                    <button type="button"
+                            class="btn btn-outline-danger btn-icon"
+                            ng-if="d.drugs.length > 1"
+                            b-toggle
+                            data-title="{{ q.tClearDrugList }}"
+                            on-click-yes="clearDrugList()">
+                      <i class="fa fa-trash"></i>
+                    </button>
+                  </div>
+                </b-pg-header>
+                <b-pg-row>
+                  <b-pg-col name="rownum" size="1">
+                    <div class="text-center">{{ drug.rownum }}</div>
+                  </b-pg-col>
+                  <b-pg-col name="drug_name" size="10">
+                    <b-input name="drugs"
+                            model="drug.drug_name"
+                            model-key="drug.drug_id"
+                            column="drug_id, name, dosage_form_name"
+                            search="name"
+                            on-select="setDrug(drug, row)"
+                            on-delete="setDrug(drug, {})"
+                            on-change="changeDrugQuery(query, value)">
+                      <header>
+                        <div class="col-sm-16"><t>drug name</t></div>
+                        <div class="col-sm-8"><t>dosage form name</t></div>
+                      </header>
+                      <content>
+                        <div class="col-sm-16">{{ row.name }}</div>
+                        <div class="col-sm-8">{{ row.dosage_form_name }}</div>
+                      </content>
+                    </b-input>
+                  </b-pg-col>
+                  <b-pg-col name="dosage_form_name" size="3"/>
+                  <b-pg-col name="required_count_medicine" size="2"> 
+                    <input type="text"
+                          ng-model="drug.required_count_medicine"
+                          class="form-control"
+                          b-number="positive"
+                          ng-required="drug.drug_id"/>
+                  </b-pg-col>
+                  <b-pg-col name="note" size="7">
+                    <input type="text"
+                          b-maxlength="200"
+                          class="form-control"
+                          ng-model="drug.note"/>
+                  </b-pg-col>
+                  <b-pg-col name="actions" size="1">
+                    <div class="text-center" ng-if="drug.rownum < d.drugs.length">
+                      <button type="button" class="btn btn-default btn-icon btn-hover-text-danger" ng-click="without(d.drugs, drug)"><i class="fa fa-trash"></i></button>
+                    </div>
+                  </b-pg-col>
+                </b-pg-row>
+              </b-pg-grid>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</form></div>

@@ -1,0 +1,51 @@
+<script biruni>
+page.ctrl(function(scope, fi, model) {
+  var d = model || {};
+
+  function save() {
+    if (page.valid(scope.form)) {
+      var data = _.pick(d, 'drug_id', 'name', 'dosage_form');
+      fi.save(data).then(page.close, page.alert);
+    }
+  }
+
+  scope.d = d;
+});
+</script>
+<div class="b-toolbar">
+  <button type="button" class="btn btn-success" ng-click="save()" ng-if="fi.save" b-hotkey="save">{{ fi.save.title }}</button>
+  <button type="button" class="btn btn-default" ng-click="page.close()">{{ page.close.title }}</button>
+</div>
+<div class="b-content"><form name="form">
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="card card-custom">
+        <div class="card-body">
+          <div class="form-group row">
+            <div class="col-sm-24">
+              <label><t>drug name</t><r /></label>
+              <input type="text" class="form-control" ng-model="d.name" b-maxlength="100" required >
+            </div>
+          </div>
+          <div class="form-group row">
+            <div class="col-sm-12">
+              <label><t>clinic research kind</t></label><br/>
+              <label class="radio">
+                <input type="radio" name="dosage_form" value="T" ng-model="d.dosage_form" />
+                <span><t>tablet</t></span>
+              </label>
+              <label class="radio">
+                <input type="radio" name="dosage_form" value="C" ng-model="d.dosage_form" />
+                <span><t>capsule</t></span>
+              </label>
+              <label class="radio">
+                <input type="radio" name="dosage_form" value="S" ng-model="d.dosage_form" />
+                <span><t>syrup</t></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</form></div>

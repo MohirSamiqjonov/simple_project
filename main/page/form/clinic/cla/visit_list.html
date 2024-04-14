@@ -1,0 +1,90 @@
+<script biruni>
+page.init(function(param, xparam) {
+  page.query('table').filter('patient_medical_history_id', '=', param.patient_medical_history_id);
+});
+page.ctrl(function(scope, model, fi, t, param) {
+  var q = {};
+
+  function makeAction(action, message, visit_id) {
+    page.confirm(message, function() {
+      action({ visit_id: visit_id }).then(page.reload, page.alert);
+    });
+  }
+
+  function add() {
+    fi.add({ patient_medical_history_id: param.patient_medical_history_id });
+  }
+
+  function deleteOne(row) {
+    makeAction(fi.delete, t('do you want to delete $1?')(row.visit_id), row.visit_id);
+  }
+
+  function deleteMany() {
+    makeAction(fi.delete, t('delete $1 visit(s)?')(q.checked.size), _.pluck(q.checked.rows, 'visit_id'));
+  }
+
+  function view(row) {
+    fi.view({ visit_id: row.visit_id });
+  }
+
+  function edit(row) {
+    fi.edit({ visit_id: row.visit_id });
+  }
+
+  function onDblclick(row) {
+    fi.view ? view(row) : fi.edit ? edit(row) : null;
+  }
+
+  function onCheck(checked) {
+    q.checked = {};
+    q.checked.rows = _.filter(checked.rows());
+    q.checked.size = q.checked.rows.length;
+    q.checked.has = q.checked.size > 0;
+  }
+
+  scope.q = q;
+});
+</script>
+<div class="b-toolbar row">
+  <div class="col-sm-14">
+    <button type="button" class="btn btn-success" ng-click="add()" ng-if="fi.add" b-hotkey="add">{{ fi.add.title }}</button>
+    <button type="button" class="btn btn-danger" ng-click="deleteMany()" ng-if="fi.delete" ng-show="q.checked.has" b-hotkey="delete">
+      <t p1="q.checked.size">delete $1</t>
+    </button>
+    <button type="button" class="btn btn-default" ng-click="page.close()" ng-hide="page.isFirst()">{{ page.close.title }}</button>
+  </div>
+  <div class="col-sm-10 b-right">
+    <b-grid-controller name="table"/>
+  </div>
+</div>
+<div class="b-content"><form name="form">
+  <b-grid name="table" required="visit_id" on-check="onCheck(checked)" on-dblclick="onDblclick(row)"
+          search="patient_medical_history_number" searchable="visit_id" extra-columns="visit_id,note">
+    <b-row>
+      <b-col name="patient_medical_history_number" size=2/>
+      <b-col name="visit_date" size=2/>
+      <b-col name="disease_names" size=4/>
+      <b-col name="drug_names" size=5/>
+      <b-col name="created_by_name" size=3/>
+      <b-col name="created_on" size=2/>
+      <b-col name="modified_by_name" size=3/>
+      <b-col name="modified_on" size=2/>
+    </b-row>
+
+    <b-action>
+      <button type="button" class="btn btn-default" ng-click="page.close(row)" ng-if="page.isDialog()"><t>select</t></button>
+      <button type="button" class="btn btn-default" ng-click="view(row)" ng-if="fi.view">{{ fi.view.title }}</button>
+      <button type="button" class="btn btn-default" ng-click="edit(row)" ng-if="fi.edit">{{ fi.edit.title }}</button>
+      <button type="button" class="btn btn-default" ng-click="deleteOne(row)" ng-if="fi.delete">{{ fi.delete.title }}</button>
+    </b-action>
+
+    <b-filter name="visit_id" directive="equal" extra/>
+    <b-filter name="patient_medical_history_id" decorate-with="patient_medical_history_number"/>
+    <b-filter name="disease_ids" decorate-with="disease_names"/>
+    <b-filter name="drug_ids" decorate-with="drug_names"/>
+    <b-filter name="created_by" decorate-with="created_by_name" extra/>
+    <b-filter name="created_on" extra/>
+    <b-filter name="modified_by" decorate-with="modified_by_name" extra/>
+    <b-filter name="modified_on" extra/>
+  </b-grid>
+</form></div>

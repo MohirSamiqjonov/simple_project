@@ -53,17 +53,10 @@ page.ctrl(function(model, scope, fi, t, param) {
     }
   }
 
-  function changePhone() {
-    // if (d.phone == null) d.phone = '+998 ';
-    // else if (d.phone.length == 7) d.phone += ' ';
-    // else if (d.phone.length == 11) d.phone += ' ';
-    // else if (d.phone.length == 14) d.phone += ' ';
-  }
-
   function save() {
     if (!page.valid(scope.form)) return;
 
-    var data = _.pick(d, 'last_name', 'first_name', 'last_name', 'patronymic', 'passport_number', 'birth_date', 'gender', 'phone', 'height', 'weight', 'address', 'job');
+    var data = _.pick(d, 'patient_medical_history_id', 'patient_medical_history_number','last_name', 'first_name', 'last_name', 'patronymic', 'passport_number', 'clinic_id', 'birth_date', 'gender', 'phone', 'height', 'weight', 'address', 'job');
     fi.save(data).then(page.close, page.alert);
   }
 
@@ -92,23 +85,38 @@ page.ctrl(function(model, scope, fi, t, param) {
               <input type="text" class="form-control" b-date-picker ng-model="d.birth_date" required />
             </div>
           </div>
-          <div class="form-group">
-            <label><t>last name</t><r /></label>
-            <input type="text" class="form-control" ng-model="d.last_name" b-maxlength="50" required />
+          <div class="form-group row">
+            <div class="col-sm-12">
+              <label><t>last name</t><r /></label>
+              <input type="text" class="form-control" ng-model="d.last_name" b-maxlength="50" required />
+            </div>
+            <div class="col-sm-12">
+              <label><t>first name</t><r /></label>
+              <input type="text" class="form-control" ng-model="d.first_name" b-maxlength="50" required />
+            </div>
           </div>
-          <div class="form-group">
-            <label><t>first name</t><r /></label>
-            <input type="text" class="form-control" ng-model="d.first_name" b-maxlength="50" required />
-          </div>
-          <div class="form-group">
-            <label><t>patronymic</t><r /></label>
-            <input type="text" class="form-control" ng-model="d.patronymic" b-maxlength="50" required />
+          <div class="form-group row">
+            <div class="col-sm-12">
+              <label><t>patronymic</t><r /></label>
+              <input type="text" class="form-control" ng-model="d.patronymic" b-maxlength="50" required />
+            </div>
+            <div class="col-sm-12">
+              <label><t>passport number</t><r /></label>
+              <input type="text" placeholder="AA1234567" class="form-control" ng-model="d.passport_number" ng-pattern="/^[A-Z]{2}\d{7}$/" required />
+            </div>
           </div>
           <div class="form-group row">
             <div class="col-sm-12">
               <div class="form-group">
-                <label><t>passport number</t><r /></label>
-                <input type="text" placeholder="AA1234567" class="form-control" ng-model="d.passport_number" ng-pattern="/^[A-Z]{2}\d{7}$/" required />
+                <label><t>clinic name</t><r /></label>
+                <b-input name="clinics"
+                        model="d.clinic_name | name"
+                        model-key="d.clinic_id | clinic_id"
+                        search="clinic_name"
+                        column="clinic_id,name"
+                        required>
+                  {{ row.name }}
+                </b-input>
               </div>
             </div>
             <div class="col-sm-12">
@@ -141,7 +149,6 @@ page.ctrl(function(model, scope, fi, t, param) {
             <div class="col-sm-8">
               <div class="form-group">
                 <label><t>body mass index</t></label>
-                <label><t>status remain days</t></label><br>
                 <div class="form-view b-offcanvas-hide alert alert-custom text-left py-1 px-5 mb-0 d-inline-flex" ng-class="'alert-light-' + q.color">
                   <div class="alert-text" style="color: black;">{{ bodyMassIndex() }}</div>
                 </div>
@@ -150,7 +157,7 @@ page.ctrl(function(model, scope, fi, t, param) {
           </div>
           <div class="form-group">
             <label><t>phone</t><r /></label>
-            <input type="text" class="form-control" ng-model="d.phone" ng-change="changePhone()" b-maxlength="17" ng-pattern="^\+\d{3} \d{2} \d{3} \d{2} \d{2}$" required />
+            <input type="text" class="form-control" ng-model="d.phone" b-telinput required />
           </div>
           <div class="form-group">
             <label><t>address</t></label>

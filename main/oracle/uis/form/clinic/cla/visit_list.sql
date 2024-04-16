@@ -15,6 +15,7 @@ uis.action('/clinic/cla/visit_list','delete','A',null,null,'A');
 uis.action('/clinic/cla/visit_list','edit','A','/clinic/cla/visit+edit','S','O');
 uis.action('/clinic/cla/visit_list','view','A','/clinic/cla/visit_view','S','O');
 
+uis.form_sibling('clinic','/clinic/cla/visit_list','/clinic/cla/patient_medical_history_list',1);
 
 uis.ready('/clinic/cla/visit_list','.add.delete.edit.model.view.');
 

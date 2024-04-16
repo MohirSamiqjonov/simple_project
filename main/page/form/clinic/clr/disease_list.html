@@ -28,6 +28,10 @@ page.ctrl(function(scope, model, fi, t) {
     fi.edit({ disease_id: row.disease_id });
   }
 
+  function onDblclick(row) {
+    fi.edit ? edit(row) : null;
+  }
+
   function onCheck(checked) {
     q.checked = {};
     q.checked.rows = _.filter(checked.rows());
@@ -66,6 +70,7 @@ page.ctrl(function(scope, model, fi, t) {
     </b-action>
 
     <b-filter name="disease_id" directive="equal" extra/>
+    <b-filter name="name"/>
     <b-filter name="state" decorate-with="state_name"/>
   </b-grid>
 </form></div>

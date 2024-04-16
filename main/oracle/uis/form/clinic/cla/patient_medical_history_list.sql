@@ -16,6 +16,7 @@ uis.action('/clinic/cla/patient_medical_history_list','delete','A',null,null,'A'
 uis.action('/clinic/cla/patient_medical_history_list','edit','A','/clinic/cla/patient_medical_history+edit','S','O');
 uis.action('/clinic/cla/patient_medical_history_list','open_visits','A','/clinic/cla/visit_list','S','O');
 
+uis.form_sibling('clinic','/clinic/cla/patient_medical_history_list','/clinic/cla/visit_list',1);
 
 uis.ready('/clinic/cla/patient_medical_history_list','.add.add_visit.delete.edit.model.open_visits.');
 

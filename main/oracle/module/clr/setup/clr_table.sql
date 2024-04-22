@@ -14,7 +14,6 @@ create table clr_diseases(
    constraint clr_diseases_pk primary key (company_id, disease_id) using index tablespace GWS_INDEX,
    constraint clr_diseases_f1 foreign key (company_id, created_by) references md_users(company_id, user_id),
    constraint clr_diseases_f2 foreign key (company_id, modified_by) references md_users(company_id, user_id),
-   constraint clr_diseases_u1 unique (name) using index tablespace GWS_INDEX,
    constraint clr_diseases_c1 check (state in ('A', 'P'))
 );
 

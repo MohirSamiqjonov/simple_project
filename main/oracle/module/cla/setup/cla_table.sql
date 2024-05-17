@@ -25,8 +25,8 @@ create table cla_patient_medical_histories(
    constraint cla_patient_medical_histories_f1 foreign key (company_id, clinic_id) references clr_clinics(company_id, clinic_id),
    constraint cla_patient_medical_histories_f2 foreign key (company_id, created_by) references md_users(company_id, user_id),
    constraint cla_patient_medical_histories_f3 foreign key (company_id, modified_by) references md_users(company_id, user_id),
-   constraint cla_patient_medical_histories_u1 unique (patient_medical_history_number) using index tablespace GWS_INDEX,
-   constraint cla_patient_medical_histories_u2 unique (passport_number) using index tablespace GWS_INDEX,
+   constraint cla_patient_medical_histories_u1 unique (company_id, patient_medical_history_number) using index tablespace GWS_INDEX,
+   constraint cla_patient_medical_histories_u2 unique (company_id, passport_number) using index tablespace GWS_INDEX,
    constraint cla_patient_medical_histories_c1 check (regexp_like(passport_number, '^[A-Z]{2}\d{7}$')),
    constraint cla_patient_medical_histories_c2 check (gender in ('M', 'F')),
    constraint cla_patient_medical_histories_c3 check ((height is null and weight is null) or (height is not null and weight is not null))

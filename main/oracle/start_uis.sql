@@ -23,3 +23,4 @@ begin uis.clear_form_translations('clinic'); uis.clear_form_siblings('clinic'); 
 @@uis\form\quickstart.sql;
 @@uis\form\tape.sql;
 @@uis\form\translate_code.sql;
+@@uis\release.sql;

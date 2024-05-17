@@ -1,6 +1,6 @@
 create or replace package Clr_Pref is
   ---------------------------------------------------------------------------------------------------- 
-  c_Uz_Region_Id constant number := 1;
+  c_Uz_Region_Name constant varchar2(10 char) := 'Узбекистан';
   ----------------------------------------------------------------------------------------------------
   --dosage form
   c_Df_Table   constant varchar2(1) := 'T';

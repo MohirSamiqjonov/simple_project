@@ -72,7 +72,7 @@ create or replace package body Ui_Clinic5 is
     for r in (select *
                 from Md_Regions w
                where w.Company_Id = Ui.Company_Id
-               start with w.Region_Id = Clr_Pref.c_Uz_Region_Id
+               start with w.Name = Clr_Pref.c_Uz_Region_Name
               connect by w.Parent_Id = prior w.Region_Id)
     loop
       Result.Push(Fazo.Zip_Map('region_id', r.Region_Id, 'parent_id', r.Parent_Id, 'name', r.Name));

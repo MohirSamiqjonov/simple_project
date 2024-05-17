@@ -19,8 +19,8 @@ create or replace package body Ui_Clinic7 is
                       where w.company_id = :company_id',
                     Fazo.Zip_Map('company_id',
                                  Ui.Company_Id,
-                                 'uz_region_id',
-                                 Clr_Pref.c_Uz_Region_Id));
+                                 'uz_region_name',
+                                 Clr_Pref.c_Uz_Region_Name));
   
     q.Number_Field('clinic_id', 'region_id', 'created_by', 'modified_by');
   
@@ -42,7 +42,7 @@ create or replace package body Ui_Clinic7 is
                      from md_regions w
                     where w.company_id = :company_id
                       and connect_by_isleaf = 1
-                     start with w.region_id = :uz_region_id
+                     start with w.name = :uz_region_name
                    connect by w.company_id = prior w.company_id
                        and w.parent_id = prior w.region_id');
   
